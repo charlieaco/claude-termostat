@@ -53,10 +53,17 @@ void test_malformed_json_returns_false_meteomatics() {
     TEST_ASSERT_FALSE(result);
 }
 
-void test_malformed_json_returns_false_open_meteo() {
+void test_open_meteo_missing_key_returns_false() {
     double temp = 0.0;
     bool result = JsonParser::extractOpenMeteoTemperature(
         String("{\"wrong_key\":42}"), temp);
+    TEST_ASSERT_FALSE(result);
+}
+
+void test_open_meteo_malformed_json_returns_false() {
+    double temp = 0.0;
+    bool result = JsonParser::extractOpenMeteoTemperature(
+        String("{{{not-valid"), temp);
     TEST_ASSERT_FALSE(result);
 }
 
@@ -67,6 +74,7 @@ int main(int argc, char** argv) {
     RUN_TEST(test_extract_value_existing_key);
     RUN_TEST(test_extract_value_missing_key);
     RUN_TEST(test_malformed_json_returns_false_meteomatics);
-    RUN_TEST(test_malformed_json_returns_false_open_meteo);
+    RUN_TEST(test_open_meteo_missing_key_returns_false);
+    RUN_TEST(test_open_meteo_malformed_json_returns_false);
     return UNITY_END();
 }
