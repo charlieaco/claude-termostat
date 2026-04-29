@@ -1,102 +1,214 @@
 // test/native/stubs/Arduino_JSON.h
 #pragma once
 #include "Arduino.h"
+#include <string>
 #include <vector>
 #include <map>
+#include <sstream>
+#include <cctype>
+#include <cstdlib>
+
+// Forward declarations
+class JSONVar;
+static JSONVar parseValue(const std::string& json, size_t& pos);
 
 class JSONVar {
-    String _value;
-    std::map<String, JSONVar> _properties;
-    std::vector<JSONVar> _elements;
-    bool _isArray = false;
-    bool _isObject = false;
-
 public:
-    JSONVar() = default;
-    JSONVar(const String& s) : _value(s) {}
+    enum class Type { UNDEFINED, NULL_T, BOOL, NUMBER, STRING, ARRAY, OBJECT };
 
-    bool isNull() const { return _value.isEmpty(); }
-    bool isValid() const { return !_value.isEmpty(); }
-    bool hasOwnProperty(const String& key) const { return _properties.count(key) > 0; }
+    Type type = Type::UNDEFINED;
+    double number = 0.0;
+    std::string str;
+    bool boolean = false;
+    std::vector<JSONVar> array;
+    std::map<std::string, JSONVar> object;
+
+    JSONVar() : type(Type::UNDEFINED) {}
+
+    bool hasOwnProperty(const char* key) const {
+        return type == Type::OBJECT && object.count(key) > 0;
+    }
+    bool hasOwnProperty(const String& key) const {
+        return hasOwnProperty(key.c_str());
+    }
 
     size_t length() const {
-        if (_isArray) return _elements.size();
-        if (_isObject) return _properties.size();
-        return _value.length();
+        if (type == Type::ARRAY) return array.size();
+        if (type == Type::OBJECT) return object.size();
+        return 0;
     }
 
-    String stringify() const { return _value; }
-    const char* c_str() const { return _value.c_str(); }
-
-    JSONVar operator[](const String& key) const {
-        auto it = _properties.find(key);
-        if (it != _properties.end()) return it->second;
+    JSONVar operator[](int idx) const {
+        if (type == Type::ARRAY && idx >= 0 && idx < (int)array.size())
+            return array[idx];
         return JSONVar();
     }
-
     JSONVar operator[](const char* key) const {
-        return (*this)[String(key)];
+        if (type == Type::OBJECT) {
+            auto it = object.find(key);
+            if (it != object.end()) return it->second;
+        }
+        return JSONVar();
     }
-
+    JSONVar operator[](const String& key) const {
+        return (*this)[key.c_str()];
+    }
     JSONVar operator[](const JSONVar& keyOrIndex) const {
-        // If it looks like a number, treat as index
-        if (keyOrIndex._isArray || keyOrIndex._isObject) {
-            return JSONVar(); // invalid usage
-        }
-        // Try as index first if _isArray
-        if (_isArray) {
-            const char* str = keyOrIndex._value.c_str();
-            int idx = std::atoi(str);
-            if (idx >= 0 && idx < (int)_elements.size()) {
-                return _elements[idx];
-            }
-        }
-        // Fall back to property lookup
-        return (*this)[keyOrIndex._value];
-    }
-
-    JSONVar operator[](int index) const {
-        if (index >= 0 && index < (int)_elements.size()) {
-            return _elements[index];
+        if (keyOrIndex.type == Type::NUMBER) {
+            return (*this)[(int)keyOrIndex.number];
+        } else if (keyOrIndex.type == Type::STRING) {
+            return (*this)[keyOrIndex.str.c_str()];
         }
         return JSONVar();
     }
 
+    // Keys — returns JSONVar array of string keys
     JSONVar keys() const {
         JSONVar result;
-        result._isArray = true;
-        for (const auto& kv : _properties) {
-            result._elements.push_back(JSONVar(kv.first));
+        result.type = Type::ARRAY;
+        for (const auto& kv : object) {
+            JSONVar k;
+            k.type = Type::STRING;
+            k.str = kv.first;
+            result.array.push_back(k);
         }
         return result;
     }
 
-    operator String() const { return _value; }
-    operator const char*() const { return _value.c_str(); }
     operator double() const {
-        const char* str = _value.c_str();
-        return str ? std::strtod(str, nullptr) : 0.0;
+        if (type == Type::NUMBER) return number;
+        if (type == Type::STRING) return std::strtod(str.c_str(), nullptr);
+        return 0.0;
     }
-    operator int() const { return (int)(double)*this; }
+    operator String() const {
+        if (type == Type::STRING) return String(str.c_str());
+        if (type == Type::NUMBER) {
+            std::ostringstream ss;
+            ss << number;
+            return String(ss.str().c_str());
+        }
+        return String("");
+    }
+    operator const char*() const { return str.c_str(); }
 };
+
+// ---- Minimal JSON parser ----
+
+static void skipWs(const std::string& s, size_t& i) {
+    while (i < s.size() && std::isspace((unsigned char)s[i])) i++;
+}
+
+static std::string parseString(const std::string& s, size_t& i) {
+    // i points to opening "
+    i++; // skip "
+    std::string result;
+    while (i < s.size() && s[i] != '"') {
+        if (s[i] == '\\' && i + 1 < s.size()) {
+            i++;
+            switch (s[i]) {
+                case '"': result += '"'; break;
+                case '\\': result += '\\'; break;
+                case '/': result += '/'; break;
+                case 'n': result += '\n'; break;
+                case 't': result += '\t'; break;
+                case 'r': result += '\r'; break;
+                default: result += s[i]; break;
+            }
+        } else {
+            result += s[i];
+        }
+        i++;
+    }
+    if (i < s.size()) i++; // skip closing "
+    return result;
+}
+
+static JSONVar parseValue(const std::string& json, size_t& pos) {
+    skipWs(json, pos);
+    JSONVar result;
+
+    if (pos >= json.size()) return result;
+
+    if (json[pos] == '"') {
+        result.type = JSONVar::Type::STRING;
+        result.str = parseString(json, pos);
+    } else if (json[pos] == '{') {
+        result.type = JSONVar::Type::OBJECT;
+        pos++; // skip {
+        skipWs(json, pos);
+        while (pos < json.size() && json[pos] != '}') {
+            skipWs(json, pos);
+            if (json[pos] != '"') break;
+            std::string key = parseString(json, pos);
+            skipWs(json, pos);
+            if (pos < json.size() && json[pos] == ':') pos++;
+            JSONVar val = parseValue(json, pos);
+            result.object[key] = val;
+            skipWs(json, pos);
+            if (pos < json.size() && json[pos] == ',') pos++;
+        }
+        if (pos < json.size()) pos++; // skip }
+    } else if (json[pos] == '[') {
+        result.type = JSONVar::Type::ARRAY;
+        pos++; // skip [
+        skipWs(json, pos);
+        while (pos < json.size() && json[pos] != ']') {
+            result.array.push_back(parseValue(json, pos));
+            skipWs(json, pos);
+            if (pos < json.size() && json[pos] == ',') pos++;
+        }
+        if (pos < json.size()) pos++; // skip ]
+    } else if (json[pos] == 't' || json[pos] == 'f') {
+        result.type = JSONVar::Type::BOOL;
+        result.boolean = (json[pos] == 't');
+        while (pos < json.size() && std::isalpha((unsigned char)json[pos])) pos++;
+    } else if (json[pos] == 'n') {
+        result.type = JSONVar::Type::NULL_T;
+        while (pos < json.size() && std::isalpha((unsigned char)json[pos])) pos++;
+    } else {
+        // number
+        result.type = JSONVar::Type::NUMBER;
+        size_t start = pos;
+        if (json[pos] == '-') pos++;
+        while (pos < json.size() && (std::isdigit((unsigned char)json[pos]) ||
+               json[pos] == '.' || json[pos] == 'e' || json[pos] == 'E' ||
+               json[pos] == '+' || json[pos] == '-')) pos++;
+        result.number = std::strtod(json.substr(start, pos - start).c_str(), nullptr);
+    }
+    skipWs(json, pos);
+    return result;
+}
+
+// ---- JSON class ----
 
 class JSONClass {
 public:
     JSONVar parse(const char* json_string) {
-        return JSONVar(json_string);
+        if (!json_string) return JSONVar();
+        std::string s(json_string);
+        size_t pos = 0;
+        return parseValue(s, pos);
     }
 
     JSONVar parse(const String& json_string) {
-        return JSONVar(json_string);
+        return parse(json_string.c_str());
     }
 
     String stringify(const JSONVar& var) {
-        return var.stringify();
+        return (String)var;
     }
 
     String typeof(const JSONVar& var) {
-        if (!var.isValid()) return String("undefined");
-        return String("object");
+        switch (var.type) {
+            case JSONVar::Type::UNDEFINED: return String("undefined");
+            case JSONVar::Type::NULL_T:    return String("null");
+            case JSONVar::Type::BOOL:      return String("boolean");
+            case JSONVar::Type::NUMBER:    return String("number");
+            case JSONVar::Type::STRING:    return String("string");
+            case JSONVar::Type::ARRAY:     return String("array");
+            case JSONVar::Type::OBJECT:    return String("object");
+        }
+        return String("undefined");
     }
 };
 
