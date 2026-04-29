@@ -89,6 +89,8 @@ public:
         }
         return String("");
     }
+    // NOTE: Only accurate for STRING type. Non-string types return "".
+    // Serial.printf is a no-op in this stub so this is harmless in tests.
     operator const char*() const { return str.c_str(); }
 };
 

@@ -9,6 +9,7 @@ public:
     int activateCoolingCount   = 0;
     int deactivateCoolingCount = 0;
     int activateEmergencyCount = 0;
+    int deactivateEmergencyCount = 0;
 
     void reset() {
         activateHeatingCount   = 0;
@@ -16,6 +17,7 @@ public:
         activateCoolingCount   = 0;
         deactivateCoolingCount = 0;
         activateEmergencyCount = 0;
+        deactivateEmergencyCount = 0;
     }
 
     void initialize() override {}
@@ -26,5 +28,5 @@ public:
     void activateCooling()   override { activateCoolingCount++; }
     void deactivateCooling() override { deactivateCoolingCount++; }
     void activateEmergency() override { activateEmergencyCount++; }
-    void deactivateEmergency() override {}
+    void deactivateEmergency() override { deactivateEmergencyCount++; }
 };
