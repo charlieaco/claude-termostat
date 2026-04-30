@@ -2,7 +2,7 @@
 
 bool MeteoApiAdapter::getCurrentTemperature(const String& timestamp, const String& authToken, double& temperature) {
     String temperatureResponse;
-    
+    Serial.println("MeteoApiAdapter: getting temperature");
     // Obtener datos de temperatura desde la API
     if (!HttpClient::getTemperatureData(timestamp, authToken, temperatureResponse)) {
         Serial.println("Failed to get temperature data from Meteomatics API");
