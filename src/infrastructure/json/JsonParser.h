@@ -8,6 +8,7 @@ class JsonParser {
 public:
     static bool extractValue(const String& jsonString, const String& key, String& result);
     static bool extractTemperatureValue(const String& jsonData, double& temperature);
+    static bool extractOpenMeteoTemperature(const String& jsonData, double& temperature);
     static void printJsonStructure(const String& jsonString);
     
 private:

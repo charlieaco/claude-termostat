@@ -14,13 +14,21 @@
 #define WIFI_RETRY_DELAY_SECONDS 10
 #define STATE_MACHINE_DELAY_SECONDS 30
 #define TOKEN_RETRY_DELAY_SECONDS 120
-#define TEMPERATURE_UPDATE_DELAY_SECONDS 120
+#define TEMPERATURE_UPDATE_DELAY_SECONDS 240
 
-// API Configuration
+// Temperature provider selection
+#define TEMPERATURE_PROVIDER_METEOMATICS 0
+#define TEMPERATURE_PROVIDER_OPEN_METEO  1
+#define TEMPERATURE_PROVIDER TEMPERATURE_PROVIDER_OPEN_METEO
+
+// API Configuration — Meteomatics
 #define METEO_API_HOST "api.meteomatics.com"
 #define METEO_LOGIN_HOST "login.meteomatics.com"
 #define METEO_API_PORT 443
 #define METEO_LOGIN_PORT 443
+
+// API Configuration — Open-Meteo
+#define OPEN_METEO_HOST "api.open-meteo.com"
 
 // SSL Configuration
 extern const char FINGERPRINT_SNI_CLOUDFLARESSL_COM[];

@@ -61,59 +61,59 @@ void ThermostatController::run() {
 }
 
 void ThermostatController::handleIdleState() {
-    Serial.println("State: IDLE - Waiting for WiFi connection");
+    Serial.println("Controller State: IDLE - Waiting for WiFi connection");
     if (wifiRepository.isConnected()) {
         transitionTo(ThermostatState::GETTING_AUTH_TOKEN);
     }
 }
 
 void ThermostatController::handleInitializingState() {
-    Serial.println("State: INITIALIZING - Setting up system");
+    Serial.println("Controller State: INITIALIZING - Setting up system");
     transitionTo(ThermostatState::IDLE);
 }
 
 void ThermostatController::handleGettingAuthTokenState() {
-    Serial.println("State: GETTING_AUTH_TOKEN - Obtaining authentication token");
+    Serial.println("Controller State: GETTING_AUTH_TOKEN - Obtaining authentication token");
     transitionTo(ThermostatState::GETTING_CURRENT_TIME);
 }
 
 void ThermostatController::handleGettingCurrentTimeState() {
-    Serial.println("State: GETTING_CURRENT_TIME - Obtaining current time");
+    Serial.println("Controller State: GETTING_CURRENT_TIME - Obtaining current time");
     transitionTo(ThermostatState::GETTING_TEMPERATURE);
 }
 
 void ThermostatController::handleGettingTemperatureState() {
-    Serial.println("State: GETTING_TEMPERATURE - Obtaining temperature data");
+    Serial.println("Controller State: GETTING_TEMPERATURE - Obtaining temperature data");
     
     if (getTemperatureUseCase.execute(currentTemperature)) {
-        Serial.printf("Temperature obtained: %.2f°C\n", currentTemperature);
+        Serial.printf("Controller Temperature obtained: %.2f°C\n", currentTemperature);
         transitionTo(ThermostatState::EVALUATING_DECISION);
     } else {
-        Serial.println("Failed to get temperature - retrying");
+        Serial.println("Controller Failed to get temperature - retrying");
         transitionTo(ThermostatState::GETTING_AUTH_TOKEN);
     }
 }
 
 void ThermostatController::handleEvaluatingDecisionState() {
-    Serial.println("State: EVALUATING_DECISION - Evaluating temperature and taking action");
+    Serial.println("Controller State: EVALUATING_DECISION - Evaluating temperature and taking action");
     
     if (controlTemperatureUseCase.execute(currentTemperature)) {
-        Serial.println("Temperature control executed successfully");
+        Serial.println("Controller Temperature control executed successfully");
     } else {
-        Serial.println("Temperature control failed");
+        Serial.println("Controller Temperature control failed");
     }
     
     transitionTo(ThermostatState::WAITING);
 }
 
 void ThermostatController::handleWaitingState() {
-    Serial.println("State: WAITING - Waiting before next cycle");
+    Serial.println("Controller State: WAITING - Waiting before next cycle");
     delayWithLedUpdate(TEMPERATURE_UPDATE_DELAY_SECONDS * ONE_SECOND);
     transitionTo(ThermostatState::GETTING_CURRENT_TIME);
 }
 
 void ThermostatController::transitionTo(ThermostatState newState) {
-    Serial.printf("Transitioning from %d to %d\n", static_cast<int>(currentState), static_cast<int>(newState));
+    Serial.printf("Controller Transitioning from %d to %d\n", static_cast<int>(currentState), static_cast<int>(newState));
     currentState = newState;
 }
 

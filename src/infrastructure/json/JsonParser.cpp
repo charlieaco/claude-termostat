@@ -71,6 +71,25 @@ void JsonParser::printJsonStructure(const String& jsonString) {
     }
 }
 
+bool JsonParser::extractOpenMeteoTemperature(const String& jsonData, double& temperature) {
+    JSONVar jsonObject = JSON.parse(jsonData);
+
+    if (!isValidJson(jsonObject)) {
+        Serial.println("OpenMeteo JSON parsing failed!");
+        return false;
+    }
+
+    JSONVar current = jsonObject["current"];
+    if (JSON.typeof(current) == "undefined") {
+        Serial.println("OpenMeteo: current not found");
+        return false;
+    }
+
+    temperature = (double)current["temperature_2m"];
+    Serial.printf("Extracted OpenMeteo temperature: %.2f°C\n", temperature);
+    return true;
+}
+
 bool JsonParser::isValidJson(const JSONVar& jsonObject) {
     return JSON.typeof(jsonObject) != "undefined";
 } 

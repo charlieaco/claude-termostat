@@ -12,8 +12,8 @@ static const char* METEOMATICS_RESPONSE =
 
 // Respuesta Open-Meteo con temperatura 17.5
 static const char* OPEN_METEO_RESPONSE =
-    "{\"current_weather\":{\"temperature\":17.5,\"windspeed\":10.0,"
-    "\"winddirection\":90,\"weathercode\":2,\"time\":\"2024-08-03T01:00\"}}";
+    "{\"current\":{\"temperature_2m\":17.5,\"wind_speed_10m\":10.0,"
+    "\"time\":\"2024-08-03T01:00\"}}";
 
 void test_extract_meteomatics_temperature() {
     double temp = 0.0;
