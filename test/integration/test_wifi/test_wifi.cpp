@@ -6,32 +6,26 @@
 
 static Esp8266WifiAdapter* wifi;
 
-void setUp() {}
-void tearDown() {}
-
-void test_wifi_connects_successfully() {
-    wifi = new Esp8266WifiAdapter();
-    bool connected = wifi->initialize();
-    TEST_ASSERT_TRUE_MESSAGE(connected, "WiFi no pudo conectar — verificar credentials.h");
-    delete wifi;
-}
-
-void test_wifi_reports_connected_after_init() {
+void setUp() {
     wifi = new Esp8266WifiAdapter();
     wifi->initialize();
-    TEST_ASSERT_TRUE(wifi->isConnected());
+}
+
+void tearDown() {
     delete wifi;
+    wifi = nullptr;
+}
+
+void test_wifi_connects_successfully() {
+    TEST_ASSERT_TRUE_MESSAGE(wifi->isConnected(), "WiFi no pudo conectar — verificar credentials.h");
 }
 
 void test_wifi_has_valid_ip() {
-    wifi = new Esp8266WifiAdapter();
-    wifi->initialize();
     IPAddress ip = WiFi.localIP();
     TEST_ASSERT_FALSE_MESSAGE(
         ip == IPAddress(0, 0, 0, 0),
-        "IP es 0.0.0.0 — WiFi no está conectado"
+        "IP es 0.0.0.0 — WiFi no esta conectado"
     );
-    delete wifi;
 }
 
 void setup() {
@@ -39,7 +33,6 @@ void setup() {
     delay(2000);
     UNITY_BEGIN();
     RUN_TEST(test_wifi_connects_successfully);
-    RUN_TEST(test_wifi_reports_connected_after_init);
     RUN_TEST(test_wifi_has_valid_ip);
     UNITY_END();
 }

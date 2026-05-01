@@ -4,6 +4,10 @@
 #include "Esp8266HardwareAdapter.h"
 #include "config.h"
 
+// NOTA: activateHeating/deactivateHeating son stubs en Esp8266HardwareAdapter.cpp hasta
+// que feature/add-sleep-mode sea mergeado. test_activate_heating_sets_pin_high FALLARA
+// en hardware hasta entonces (LED_PIN_2 permanece LOW).
+
 static Esp8266HardwareAdapter* hw;
 
 void setUp() {
