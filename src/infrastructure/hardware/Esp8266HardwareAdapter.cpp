@@ -3,29 +3,27 @@
 void Esp8266HardwareAdapter::initialize() {
     pinMode(LED_PIN_1, OUTPUT);
     pinMode(LED_PIN_2, OUTPUT);
-    digitalWrite(LED_PIN_1, LOW);
+    digitalWrite(LED_PIN_1, HIGH);
     digitalWrite(LED_PIN_2, LOW);
     Serial.println("ESP8266 hardware initialized successfully");
 }
 
 void Esp8266HardwareAdapter::updateLeds(bool status) {
     digitalWrite(LED_PIN_1, status);
-    digitalWrite(LED_PIN_2, status);
 }
 
 void Esp8266HardwareAdapter::sleep(unsigned long milliseconds) {
-    unsigned long startTime = millis();
-    while (millis() - startTime < milliseconds) {
-        delay(500);
-    }
+    digitalWrite(LED_PIN_1, LOW);
+    delay(milliseconds);
+    digitalWrite(LED_PIN_1, HIGH);
 }
 
 void Esp8266HardwareAdapter::activateHeating() {
-    Serial.println("Hardware: Activating heating system");
+    digitalWrite(LED_PIN_2, HIGH);
 }
 
 void Esp8266HardwareAdapter::deactivateHeating() {
-    Serial.println("Hardware: Deactivating heating system");
+    digitalWrite(LED_PIN_2, LOW);
 }
 
 void Esp8266HardwareAdapter::activateCooling() {
