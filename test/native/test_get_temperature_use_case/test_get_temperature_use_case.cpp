@@ -62,8 +62,7 @@ void test_auth_token_passed_to_temperature_call() {
     fakeTemp->fakeToken = "my-token";
     double temp = 0.0;
     useCase->execute(temp);
-    TEST_ASSERT_EQUAL(1, fakeTemp->authCallCount);
-    TEST_ASSERT_EQUAL(1, fakeTemp->tempCallCount);
+    TEST_ASSERT_EQUAL_STRING("my-token", fakeTemp->lastReceivedToken.c_str());
 }
 
 int main(int argc, char** argv) {
