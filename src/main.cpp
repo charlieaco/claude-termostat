@@ -17,7 +17,6 @@
 // Infrastructure Layer
 #include "infrastructure/http/HttpClient.h"
 #include "infrastructure/json/JsonParser.h"
-#include "infrastructure/http/WorldTimeApiAdapter.h"
 #include "infrastructure/hardware/Esp8266HardwareAdapter.h"
 #include "infrastructure/hardware/Esp8266WifiAdapter.h"
 
@@ -25,6 +24,7 @@
 #include "infrastructure/http/OpenMeteoAdapter.h"
 #else
 #include "infrastructure/http/MeteoApiAdapter.h"
+#include "infrastructure/http/WorldTimeApiAdapter.h"
 #endif
 
 // Interfaces Layer
@@ -35,13 +35,17 @@
 OpenMeteoAdapter temperatureAdapter;
 #else
 MeteoApiAdapter temperatureAdapter;
-#endif
 WorldTimeApiAdapter worldTimeApiAdapter;
+#endif
 Esp8266HardwareAdapter hardwareAdapter;
 Esp8266WifiAdapter wifiAdapter;
 
 // Application Layer instances
+#if TEMPERATURE_PROVIDER == TEMPERATURE_PROVIDER_OPEN_METEO
+GetTemperatureUseCase getTemperatureUseCase(temperatureAdapter, temperatureAdapter);
+#else
 GetTemperatureUseCase getTemperatureUseCase(temperatureAdapter, worldTimeApiAdapter);
+#endif
 ControlTemperatureUseCase controlTemperatureUseCase(hardwareAdapter);
 
 // Interfaces Layer instance

@@ -10,9 +10,10 @@ bool GetTemperatureUseCase::execute(double& temperature) {
         return false;
     }
     
-    // Obtener hora actual (no fatal: providers como Open-Meteo no la necesitan)
+    // Obtener hora actual
     if (!getCurrentTime(currentTime)) {
-        Serial.println("Warning: failed to get current time, proceeding with empty timestamp");
+        Serial.println("Failed to get current time");
+        return false;
     }
     
     // Obtener temperatura

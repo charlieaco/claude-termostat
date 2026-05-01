@@ -90,6 +90,24 @@ bool JsonParser::extractOpenMeteoTemperature(const String& jsonData, double& tem
     return true;
 }
 
+bool JsonParser::extractOpenMeteoTime(const String& jsonData, String& time) {
+    JSONVar jsonObject = JSON.parse(jsonData);
+
+    if (!isValidJson(jsonObject)) {
+        Serial.println("OpenMeteo JSON parsing failed (time)!");
+        return false;
+    }
+
+    JSONVar current = jsonObject["current"];
+    if (JSON.typeof(current) == "undefined") {
+        Serial.println("OpenMeteo: current not found (time)");
+        return false;
+    }
+
+    time = (String)current["time"];
+    return true;
+}
+
 bool JsonParser::isValidJson(const JSONVar& jsonObject) {
     return JSON.typeof(jsonObject) != "undefined";
 } 

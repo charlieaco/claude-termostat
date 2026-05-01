@@ -7,7 +7,7 @@ ThermostatStateMachine::ThermostatStateMachine()
 
 void ThermostatStateMachine::initialize() {
     // Initialize hardware
-    pinMode(LED_PIN_1, OUTPUT);
+    pinMode(LED_PIN_2, OUTPUT);
     pinMode(LED_PIN_2, OUTPUT);
     
     // Initialize serial communication
@@ -145,7 +145,7 @@ void ThermostatStateMachine::updateLeds() {
     static bool ledStatus = HIGH;
     ledStatus = !ledStatus; // Toggle LED status
     
-    digitalWrite(LED_PIN_1, ledStatus);
+    digitalWrite(LED_PIN_2, ledStatus);
     digitalWrite(LED_PIN_2, ledStatus);
 }
 

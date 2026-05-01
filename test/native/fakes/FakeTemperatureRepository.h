@@ -8,6 +8,7 @@ public:
     bool tempResult       = true;
     double fakeTemp       = 20.0;
     String fakeToken      = "fake-token";
+    String lastReceivedToken;
     int authCallCount     = 0;
     int tempCallCount     = 0;
 
@@ -17,8 +18,9 @@ public:
         return tokenResult;
     }
 
-    bool getCurrentTemperature(const String&, const String&, double& temperature) override {
+    bool getCurrentTemperature(const String&, const String& token, double& temperature) override {
         tempCallCount++;
+        lastReceivedToken = token;
         temperature = fakeTemp;
         return tempResult;
     }
