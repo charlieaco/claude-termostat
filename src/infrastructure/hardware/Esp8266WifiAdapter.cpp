@@ -2,10 +2,11 @@
 
 bool Esp8266WifiAdapter::initialize() {
     Serial.println("Initializing WiFi connection...");
-    
+
     setupWifiMode();
+    WiFi.setSleepMode(WIFI_LIGHT_SLEEP);
     addWifiNetworks();
-    
+
     Serial.printf("WiFi configured for SSID: %s\n", WIFI_SSID);
     return true;
 }
