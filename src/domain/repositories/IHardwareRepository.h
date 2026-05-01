@@ -26,10 +26,10 @@ public:
     virtual void updateLeds(bool status) = 0;
     
     /**
-     * @brief Ejecuta un delay con actualización de LEDs
+     * @brief Ejecuta un sleep de bajo consumo
      * @param milliseconds Tiempo de espera en milisegundos
      */
-    virtual void delayWithLedUpdate(unsigned long milliseconds) = 0;
+    virtual void sleep(unsigned long milliseconds) = 0;
     
     /**
      * @brief Activa el sistema de calefacción

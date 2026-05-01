@@ -22,7 +22,7 @@ public:
 
     void initialize() override {}
     void updateLeds(bool) override {}
-    void delayWithLedUpdate(unsigned long) override {}
+    void sleep(unsigned long) override {}
     void activateHeating()   override { activateHeatingCount++; }
     void deactivateHeating() override { deactivateHeatingCount++; }
     void activateCooling()   override { activateCoolingCount++; }
