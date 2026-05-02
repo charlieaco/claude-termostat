@@ -80,6 +80,13 @@ void test_extract_open_meteo_apparent_temperature() {
     TEST_ASSERT_FLOAT_WITHIN(0.01, 11.8, temp);
 }
 
+void test_open_meteo_apparent_temperature_missing_key_returns_false() {
+    double temp = 0.0;
+    bool result = JsonParser::extractOpenMeteoApparentTemperature(
+        String("{\"current\":{\"temperature_2m\":14.2}}"), temp);
+    TEST_ASSERT_FALSE(result);
+}
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_extract_meteomatics_temperature);
@@ -90,5 +97,6 @@ int main(int argc, char** argv) {
     RUN_TEST(test_open_meteo_missing_key_returns_false);
     RUN_TEST(test_open_meteo_malformed_json_returns_false);
     RUN_TEST(test_extract_open_meteo_apparent_temperature);
+    RUN_TEST(test_open_meteo_apparent_temperature_missing_key_returns_false);
     return UNITY_END();
 }

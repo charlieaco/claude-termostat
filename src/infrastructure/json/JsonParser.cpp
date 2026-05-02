@@ -104,6 +104,11 @@ bool JsonParser::extractOpenMeteoApparentTemperature(const String& jsonData, dou
         return false;
     }
 
+    if (JSON.typeof(current["apparent_temperature"]) == "undefined") {
+        Serial.println("OpenMeteo: apparent_temperature not found");
+        return false;
+    }
+
     apparentTemp = (double)current["apparent_temperature"];
     return true;
 }
