@@ -15,6 +15,11 @@ static const char* OPEN_METEO_RESPONSE =
     "{\"current\":{\"temperature_2m\":17.5,\"wind_speed_10m\":10.0,"
     "\"time\":\"2024-08-03T01:00\"}}";
 
+// Respuesta Open-Meteo con temperatura aparente 11.8
+static const char* OPEN_METEO_RESPONSE_WITH_APPARENT =
+    "{\"current\":{\"time\":\"2026-05-01T10:00\","
+    "\"temperature_2m\":14.2,\"apparent_temperature\":11.8}}";
+
 void test_extract_meteomatics_temperature() {
     double temp = 0.0;
     bool result = JsonParser::extractTemperatureValue(
@@ -67,6 +72,14 @@ void test_open_meteo_malformed_json_returns_false() {
     TEST_ASSERT_FALSE(result);
 }
 
+void test_extract_open_meteo_apparent_temperature() {
+    double temp = 0.0;
+    bool result = JsonParser::extractOpenMeteoApparentTemperature(
+        String(OPEN_METEO_RESPONSE_WITH_APPARENT), temp);
+    TEST_ASSERT_TRUE(result);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, 11.8, temp);
+}
+
 int main(int argc, char** argv) {
     UNITY_BEGIN();
     RUN_TEST(test_extract_meteomatics_temperature);
@@ -76,5 +89,6 @@ int main(int argc, char** argv) {
     RUN_TEST(test_malformed_json_returns_false_meteomatics);
     RUN_TEST(test_open_meteo_missing_key_returns_false);
     RUN_TEST(test_open_meteo_malformed_json_returns_false);
+    RUN_TEST(test_extract_open_meteo_apparent_temperature);
     return UNITY_END();
 }
