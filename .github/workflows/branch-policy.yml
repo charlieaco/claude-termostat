@@ -1,0 +1,33 @@
+name: Branch Policy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+jobs:
+  check-source-branch:
+    name: Verificar nombre de branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR a develop — debe venir de feature/, release/ o hotfix/
+        if: github.base_ref == 'develop'
+        run: |
+          HEAD="${{ github.head_ref }}"
+          if [[ ! "$HEAD" =~ ^(feature|release|hotfix)/ ]]; then
+            echo "Error: los PRs a 'develop' deben venir de feature/, release/ o hotfix/."
+            echo "Branch fuente: $HEAD"
+            exit 1
+          fi
+          echo "OK: $HEAD -> develop"
+
+      - name: PR a main — debe venir de release/ o hotfix/
+        if: github.base_ref == 'main'
+        run: |
+          HEAD="${{ github.head_ref }}"
+          if [[ ! "$HEAD" =~ ^(release|hotfix)/ ]]; then
+            echo "Error: los PRs a 'main' deben venir de release/ o hotfix/."
+            echo "Branch fuente: $HEAD"
+            exit 1
+          fi
+          echo "OK: $HEAD -> main"
