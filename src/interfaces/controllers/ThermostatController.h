@@ -68,7 +68,7 @@ private:
     
     // Métodos auxiliares
     void transitionTo(ThermostatState newState);
-    void delayWithLedUpdate(unsigned long milliseconds);
+    void sleep(unsigned long milliseconds);
 };
 
 #endif // THERMOSTAT_CONTROLLER_H 

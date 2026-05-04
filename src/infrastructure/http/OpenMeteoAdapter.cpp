@@ -16,7 +16,7 @@ bool OpenMeteoAdapter::fetchResponse(String& response) {
     String url = String("https://") + OPEN_METEO_HOST +
                  "/v1/forecast?latitude=" + LOCATION_LATITUDE +
                  "&longitude=" + LOCATION_LONGITUDE +
-                 "&current=temperature_2m"
+                 "&current=temperature_2m,apparent_temperature"
                  "&timezone=America%2FArgentina%2FBuenos_Aires";
 
     if (!https.begin(*client, url)) {
@@ -63,11 +63,20 @@ bool OpenMeteoAdapter::getCurrentTemperature(const String&, const String&, doubl
         if (!fetchResponse(response)) return false;
     }
 
-    if (!JsonParser::extractOpenMeteoTemperature(response, temperature)) {
-        Serial.println("OpenMeteo: failed to parse temperature");
+    double airTemp = 0.0;
+    double apparentTemp = 0.0;
+
+    if (!JsonParser::extractOpenMeteoTemperature(response, airTemp)) {
+        Serial.println("OpenMeteo: failed to parse temperature_2m");
         return false;
     }
 
-    Serial.printf("Temperature obtained from Open-Meteo: %.2f°C\n", temperature);
+    if (!JsonParser::extractOpenMeteoApparentTemperature(response, apparentTemp)) {
+        Serial.println("OpenMeteo: failed to parse apparent_temperature");
+        return false;
+    }
+
+    Serial.printf("OpenMeteo: temperatura_2m=%.2f°C  apparent=%.2f°C\n", airTemp, apparentTemp);
+    temperature = apparentTemp;
     return true;
 }

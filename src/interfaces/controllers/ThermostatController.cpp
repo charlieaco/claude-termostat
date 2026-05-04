@@ -28,7 +28,7 @@ void ThermostatController::initialize() {
 void ThermostatController::run() {
     if (!wifiRepository.isConnected()) {
         Serial.println("WiFi not connected - waiting for connection...");
-        delayWithLedUpdate(WIFI_RETRY_DELAY_SECONDS * ONE_SECOND);
+        sleep(WIFI_RETRY_DELAY_SECONDS * ONE_SECOND);
         transitionTo(ThermostatState::INITIALIZING);
         return;
     }
@@ -57,7 +57,7 @@ void ThermostatController::run() {
             break;
     }
     
-    delayWithLedUpdate(STATE_MACHINE_DELAY_SECONDS * ONE_SECOND);
+    sleep(STATE_MACHINE_DELAY_SECONDS * ONE_SECOND);
 }
 
 void ThermostatController::handleIdleState() {
@@ -108,7 +108,7 @@ void ThermostatController::handleEvaluatingDecisionState() {
 
 void ThermostatController::handleWaitingState() {
     Serial.println("Controller State: WAITING - Waiting before next cycle");
-    delayWithLedUpdate(TEMPERATURE_UPDATE_DELAY_SECONDS * ONE_SECOND);
+    sleep(TEMPERATURE_UPDATE_DELAY_SECONDS * ONE_SECOND);
     transitionTo(ThermostatState::GETTING_CURRENT_TIME);
 }
 
@@ -117,6 +117,6 @@ void ThermostatController::transitionTo(ThermostatState newState) {
     currentState = newState;
 }
 
-void ThermostatController::delayWithLedUpdate(unsigned long milliseconds) {
-    hardwareAdapter.delayWithLedUpdate(milliseconds);
+void ThermostatController::sleep(unsigned long milliseconds) {
+    hardwareAdapter.sleep(milliseconds);
 } 
